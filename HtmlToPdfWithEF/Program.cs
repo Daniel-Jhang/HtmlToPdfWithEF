@@ -79,9 +79,8 @@ namespace HtmlToPdfWithEF
                 Console.WriteLine("開始生成PDF檔案 " + DateTime.Now.ToString());
 
                 var taskList = new List<Task<PdfDocument>>();
-                //var taskList = new List<Task<IList<IElement>>>();
 
-                int range = 2000;
+                int range = 3000;
                 int times = detailList.Count / range + (detailList.Count % range > 0 ? 1 : 0);
 
                 for (int i = 1; i <= times; i++)
@@ -155,7 +154,7 @@ namespace HtmlToPdfWithEF
                 PdfDocument temp = new PdfDocument(new PdfWriter(baos));
                 HtmlConverter.ConvertToPdf(combineHtml, temp, converterProperties);
                 temp = new PdfDocument(new PdfReader(new MemoryStream(baos.ToArray())));
-                Console.WriteLine("1");
+                //Console.WriteLine("1");
                 return temp;
             });
         }
