@@ -41,8 +41,8 @@ namespace HtmlToPdfWithEF
             {
                 Console.WriteLine("開始: " + DateTime.Now.ToString());
                 Console.WriteLine("進DB撈資料" + DateTime.Now.ToString());
-                //List<PurchaseTransactionDetail> detailList = db.PurchaseTransactionDetail.OrderBy(x => x.SqlId).AsNoTracking().ToList(); // 255568筆 
-                List<PurchaseTransactionDetail> detailList = db.PurchaseTransactionDetail.Take(10000).OrderBy(x => x.SqlId).AsNoTracking().ToList();
+                List<PurchaseTransactionDetail> detailList = db.PurchaseTransactionDetail.OrderBy(x => x.SqlId).AsNoTracking().ToList(); // 255568筆 
+                //List<PurchaseTransactionDetail> detailList = db.PurchaseTransactionDetail.Take(10000).OrderBy(x => x.SqlId).AsNoTracking().ToList();
                 Console.WriteLine("撈出資料" + DateTime.Now.ToString());
 
                 //設定PDF屬性
