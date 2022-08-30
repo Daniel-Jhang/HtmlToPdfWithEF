@@ -42,7 +42,7 @@ namespace HtmlToPdfWithEF
                 Console.WriteLine("開始: " + DateTime.Now.ToString());
                 Console.WriteLine("進DB撈資料" + DateTime.Now.ToString());
                 List<PurchaseTransactionDetail> detailList = db.PurchaseTransactionDetail.OrderBy(x => x.SqlId).AsNoTracking().ToList(); // 255568筆 
-                //List<PurchaseTransactionDetail> detailList = db.PurchaseTransactionDetail.Take(10000).OrderBy(x => x.SqlId).AsNoTracking().ToList();
+                //List<PurchaseTransactionDetail> detailList = db.PurchaseTransactionDetail.Take(1000).OrderBy(x => x.SqlId).AsNoTracking().ToList();
                 Console.WriteLine("撈出資料" + DateTime.Now.ToString());
 
                 //設定PDF屬性
@@ -73,6 +73,26 @@ namespace HtmlToPdfWithEF
                                  "<th>PurchaseTransactionId</th>" +
                                  "<th>RowNumber</th>" +
                                  "<th>ItemDescription</th>" +
+                                 "<th>PurchaseProductCategoryId</th>" +
+                                 "<th>UnitPrice</th>" +
+                                 "<th>Quantity</th>" +
+                                 "<th>TotalAmount</th>" +
+                                 "<th>UOM</th>" +
+                                 "<th>SalesProductMasterId</th>" +
+                                 "<th>UpdateTimeStamp</th>" +
+                                 "<th>CreateDateTime</th>" +
+                                 "<th>MigrationTime</th>" +
+                                 "<th>LineNo</th>" +
+                                 "<th>ApplyToLine</th>" +
+                                 "<th>RetailType</th>" +
+                                 "<th>OriginalAmount</th>" +
+                                 "<th>PSP</th>" +
+                                 "<th>PromotionId</th>" +
+                                 "<th>PromotionDesc</th>" +
+                                 "<th>QRCode</th>" +
+                                 "<th>CouponCode</th>" +
+                                 "<th>PayCode</th>" +
+                                 "<th>SubClassId</th>" +
                              "</tr><tr>";
                 htmlStringBuilder.Append(htmlText);
 
@@ -94,6 +114,26 @@ namespace HtmlToPdfWithEF
                         htmlStringBuilder.Append($"<td>{item.PurchaseTransactionId}</td>");
                         htmlStringBuilder.Append($"<td>{item.RowNumber}</td>");
                         htmlStringBuilder.Append($"<td>{item.ItemDescription}</td>");
+                        htmlStringBuilder.Append($"<td>{item.PurchaseProductCategoryId}</td>");
+                        htmlStringBuilder.Append($"<td>{item.UnitPrice}</td>");
+                        htmlStringBuilder.Append($"<td>{item.Quantity}</td>");
+                        htmlStringBuilder.Append($"<td>{item.TotalAmount}</td>");
+                        htmlStringBuilder.Append($"<td>{item.Uom}</td>");
+                        htmlStringBuilder.Append($"<td>{item.SalesProductMasterId}</td>");
+                        htmlStringBuilder.Append($"<td>{item.UpdateTimeStamp}</td>");
+                        htmlStringBuilder.Append($"<td>{item.CreateDateTime}</td>");
+                        htmlStringBuilder.Append($"<td>{item.MigrationTime}</td>");
+                        htmlStringBuilder.Append($"<td>{item.LineNo}</td>");
+                        htmlStringBuilder.Append($"<td>{item.ApplyToLine}</td>");
+                        htmlStringBuilder.Append($"<td>{item.RetailType}</td>");
+                        htmlStringBuilder.Append($"<td>{item.OriginalAmount}</td>");
+                        htmlStringBuilder.Append($"<td>{item.Psp}</td>");
+                        htmlStringBuilder.Append($"<td>{item.PromotionId}</td>");
+                        htmlStringBuilder.Append($"<td>{item.PromotionDesc}</td>");
+                        htmlStringBuilder.Append($"<td>{item.Qrcode}</td>");
+                        htmlStringBuilder.Append($"<td>{item.CouponCode}</td>");
+                        htmlStringBuilder.Append($"<td>{item.PayCode}</td>");
+                        htmlStringBuilder.Append($"<td>{item.SubClassId}</td>");
                         htmlStringBuilder.Append("</tr>");
                     }
                     htmlStringBuilder.Append("</table>");
@@ -134,13 +174,13 @@ namespace HtmlToPdfWithEF
             }
             Console.WriteLine("結束: " + DateTime.Now.ToString());
         }
-       private static async Task<PdfDocument> ConvertToPdfDocumentAsync(string combineHtml)
+        private static async Task<PdfDocument> ConvertToPdfDocumentAsync(string combineHtml)
         {
             return await Task.Run(() =>
             {
                 //設定PDF屬性
                 ConverterProperties converterProperties = new ConverterProperties();
-  
+
                 //設定字型
                 FontProvider fontProvider = new DefaultFontProvider(false, false, false);
                 foreach (string fontPath in FONTS)
@@ -152,6 +192,7 @@ namespace HtmlToPdfWithEF
 
                 MemoryStream baos = new MemoryStream();
                 PdfDocument temp = new PdfDocument(new PdfWriter(baos));
+                temp.SetDefaultPageSize(PageSize.A4.Rotate()); //將 PDF轉成橫向
                 HtmlConverter.ConvertToPdf(combineHtml, temp, converterProperties);
                 temp = new PdfDocument(new PdfReader(new MemoryStream(baos.ToArray())));
                 //Console.WriteLine("1");
