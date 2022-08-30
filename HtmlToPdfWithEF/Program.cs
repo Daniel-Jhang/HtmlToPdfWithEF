@@ -1,6 +1,4 @@
-﻿using Dapper;
-using HtmlToPdfWithEF.DataAccess;
-using HtmlToPdfWithEF.Models;
+﻿using HtmlToPdfWithEF.Models;
 using iText.Html2pdf;
 using iText.Html2pdf.Resolver.Font;
 using iText.IO.Font;
@@ -12,18 +10,11 @@ using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Font;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -110,62 +101,9 @@ namespace HtmlToPdfWithEF
                     string combineHtml = htmlStringBuilder.ToString();
                     taskList.Add(ConvertToPdfDocumentAsync(combineHtml));
 
-                    #region sample
-                    //int delayInterval = 500 * i;
-                    ///#1 使用 PdfMerger
-                    //taskList.Add( Task.Run (() =>
-                    //{
-                    //    //await Task.Delay(delayInterval);
-                    //    htmlStringBuilder.Append("</table>");
-                    //    MemoryStream baos = new MemoryStream();
-                    //    PdfDocument temp = new PdfDocument(new PdfWriter(baos));
-                    //    HtmlConverter.ConvertToPdf(htmlStringBuilder.ToString(), temp, converterProperties);
-                    //    temp = new PdfDocument(new PdfReader(new MemoryStream(baos.ToArray())));
-                    //    Console.WriteLine("1");
-                    //    return temp;
-                    //}));
-
-                    ///#2 使用 IElement List
-                    //taskList.Add(Task.Run(async () =>
-                    //{
-                    //    await Task.Delay(delayInterval);
-                    //    htmlStringBuilder.Append("</table>");
-                    //    IList<IElement> elements = HtmlConverter.ConvertToElements(htmlStringBuilder.ToString(), converterProperties);
-                    //    Console.WriteLine("1");
-                    //    return elements;
-                    //}));
-                    #endregion
-
-                    #region ori
-                    ///#1 使用 PdfMerger
-                    //htmlStringBuilder.Append("</table>");
-                    //MemoryStream baos = new MemoryStream();
-                    //PdfDocument temp = new PdfDocument(new PdfWriter(baos));
-                    //HtmlConverter.ConvertToPdf(htmlStringBuilder.ToString(), temp, converterProperties);
-                    //temp = new PdfDocument(new PdfReader(new MemoryStream(baos.ToArray())));
-                    //merger.Merge(temp, 1, temp.GetNumberOfPages());
-                    //temp.Close();
-
-                    ///#2 使用 IElement List
-                    //htmlStringBuilder.Append("</table>");
-                    //IList<IElement> elements = HtmlConverter.ConvertToElements(htmlStringBuilder.ToString(), converterProperties);
-                    //foreach (var item in elements)
-                    //{
-                    //    pdfDoc.Add((IBlockElement)item);
-                    //}
-                    #endregion
-
                     htmlStringBuilder.Clear();
                     htmlStringBuilder.Append("<table>");//*
                 }
-
-                //var result = await Task.WhenAll(taskList);
-
-                //foreach (var item in result)
-                //{
-                //    merger.Merge(item, 1, item.GetNumberOfPages());
-                //    item.Close();
-                //}
 
                 var results = Task.WhenAll(taskList);
                 try
@@ -185,15 +123,6 @@ namespace HtmlToPdfWithEF
                         merger.Merge(item, 1, item.GetNumberOfPages());
                         item.Close();
                     }
-
-                    ///#2 使用 IElement List
-                    //foreach (var elements in results.Result)
-                    //{
-                    //    for (int i = 0; i < elements.Count; i++)
-                    //    {
-                    //        pdfDoc.Add((IBlockElement)elements[i]);
-                    //    }
-                    //}
                 }
                 else // Display information on faulted tasks.
                 {
@@ -203,23 +132,6 @@ namespace HtmlToPdfWithEF
                     }
                 }
                 pdfDoc.Close();
-
-
-                //async Task<PdfDocument> ConvertToPdfDocumentAsync(string combineHtml, ConverterProperties converterProperties)
-                //{
-                //    return await Task.Run(() =>
-                //    {
-                //        ConverterProperties cp = new ConverterProperties();
-                //        //htmlStringBuilder.Append("</table>");
-                //        MemoryStream baos = new MemoryStream();
-                //        PdfDocument temp = new PdfDocument(new PdfWriter(baos));
-                //        //string combineHtml = htmlStringBuilder.ToString();
-                //        HtmlConverter.ConvertToPdf(combineHtml, temp, cp);
-                //        temp = new PdfDocument(new PdfReader(new MemoryStream(baos.ToArray())));
-                //        Console.WriteLine("1");
-                //        return temp;
-                //    });
-                //}
             }
             Console.WriteLine("結束: " + DateTime.Now.ToString());
         }
@@ -239,59 +151,13 @@ namespace HtmlToPdfWithEF
                 }
                 converterProperties.SetFontProvider(fontProvider);
 
-                //htmlStringBuilder.Append("</table>");
                 MemoryStream baos = new MemoryStream();
                 PdfDocument temp = new PdfDocument(new PdfWriter(baos));
-                //string combineHtml = htmlStringBuilder.ToString();
                 HtmlConverter.ConvertToPdf(combineHtml, temp, converterProperties);
                 temp = new PdfDocument(new PdfReader(new MemoryStream(baos.ToArray())));
                 Console.WriteLine("1");
                 return temp;
             });
-        }
-
-        private static async Task<IList<IElement>> ConvertToElementAsync(string htmlText, ConverterProperties converterProperties)
-        {
-            IList<IElement> elements = HtmlConverter.ConvertToElements(htmlText, converterProperties);
-            Console.WriteLine("1");
-            return elements;
-        }
-
-        private static async Task<byte[]> ConvertToByteAsync(string htmlText, ConverterProperties converterProperties)
-        {
-            //byte[] tempBytes;
-            //using (var memoryStream = new MemoryStream())
-            //{
-            //    HtmlConverter.ConvertToPdf(htmlText, memoryStream);
-            //    tempBytes = memoryStream.ToArray();
-            //}
-            //return tempBytes;
-
-            var stream = new MemoryStream();
-            var writer = new PdfWriter(stream);
-            var pdf = new PdfDocument(writer);
-            var document = new Document(pdf);
-
-            document = HtmlConverter.ConvertToDocument(htmlText, pdf, converterProperties);
-            //document.Close();
-
-            return stream.ToArray();
-        }
-
-        private static async Task<ByteArrayOutputStream> ConvertToMemoryStreamAsync(string htmlText)
-        {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            HtmlConverter.ConvertToPdf(htmlText, baos);
-            return baos;
-        }
-
-        private static async Task<Document> ConvertToDocumentAsync(string htmlText, PdfWriter pdfWriter, ConverterProperties converterProperties)
-        {
-            PdfDocument pdf = new PdfDocument(pdfWriter); // 生成 PDF檔案
-            pdf.SetDefaultPageSize(PageSize.A4.Rotate()); //將 PDF轉成橫向
-            Document temp = new Document(pdf);
-            temp = HtmlConverter.ConvertToDocument(htmlText, pdfWriter, converterProperties);
-            return temp;
         }
     }
 }
